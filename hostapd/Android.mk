@@ -979,7 +979,7 @@ endif
 ifneq ($(BOARD_HOSTAPD_PRIVATE_LIB),)
 LOCAL_STATIC_LIBRARIES += $(BOARD_HOSTAPD_PRIVATE_LIB)
 endif
-LOCAL_SHARED_LIBRARIES := libc libcutils liblog libcrypto libssl
+LOCAL_SHARED_LIBRARIES := libc libcutils liblog libcrypto libssl libhardware_legacy
 ifdef CONFIG_DRIVER_NL80211
 ifneq ($(wildcard external/libnl),)
 LOCAL_SHARED_LIBRARIES += libnl
