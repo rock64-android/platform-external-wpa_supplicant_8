@@ -610,14 +610,34 @@ size_t printf_decode(u8 *buf, size_t maxlen, const char *str)
  */
 const char * wpa_ssid_txt(const u8 *ssid, size_t ssid_len)
 {
-	static char ssid_txt[SSID_MAX_LEN * 4 + 1];
+#ifdef SUPPORT_GBK_SSID
+       static char ssid_txt[12 * 16 + 1];
+       u8 ssid_tmp[32 * 4] = {0};
+       int len = 0;
+#else
+       static char ssid_txt[SSID_MAX_LEN * 4 + 1];
+#endif
 
 	if (ssid == NULL) {
 		ssid_txt[0] = '\0';
 		return ssid_txt;
 	}
 
-	printf_encode(ssid_txt, sizeof(ssid_txt), ssid, ssid_len);
+#ifdef SUPPORT_GBK_SSID
+       memset(ssid_txt, 0, 12 * 16 + 1);
+       if (!isAsciiRange(ssid, ssid_len) && !IsTextUTF8(ssid, ssid_len)) {     
+              gbk2utf8(ssid, ssid_len, ssid_tmp);
+	      len = strlen(ssid_tmp);
+	      //wpa_printf(MSG_ERROR, "%s: len = %d,ssid = %s,ssid_tmp = %s\n",__FUNCTION__,len,ssid,ssid_tmp);
+              if (len > 0)
+                       printf_encode(ssid_txt, sizeof(ssid_txt), ssid_tmp, len);
+              else
+                       printf_encode(ssid_txt, sizeof(ssid_txt), ssid, ssid_len);
+       } else
+               printf_encode(ssid_txt, sizeof(ssid_txt), ssid, ssid_len);
+#else
+        printf_encode(ssid_txt, sizeof(ssid_txt), ssid, ssid_len);
+#endif
 	return ssid_txt;
 }
 

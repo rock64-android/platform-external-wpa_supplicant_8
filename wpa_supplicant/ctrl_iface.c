@@ -3005,7 +3005,25 @@ static int wpa_supplicant_ctrl_iface_update_network(
 {
 	int ret;
 
+#ifdef SUPPORT_GBK_SSID
+        u8 ssid_tmp[32 * 4] = {0};
+
+	//wpa_printf(MSG_ERROR,"%s: value = %s,strlen(value) = %d\n",__FUNCTION__,value,strlen(value));
+        if (!os_strcmp(name, "ssid") && !isAsciiRange(value, strlen(value)) 
+                       && !CheckIsSsidTextUtf8(wpa_s, value)) {
+		utf82gbk(value, strlen(value), ssid_tmp);
+		int len = strlen(ssid_tmp);
+               if (len > 0) {
+                       ret = wpa_config_set(ssid, name, ssid_tmp, 0);
+	       } else {
+                       ret = wpa_config_set(ssid, name, value, 0);
+	       }
+        } else {
+               ret = wpa_config_set(ssid, name, value, 0);
+        }
+#else
 	ret = wpa_config_set(ssid, name, value, 0);
+#endif
 	if (ret < 0) {
 		wpa_printf(MSG_DEBUG, "CTRL_IFACE: Failed to set network "
 			   "variable '%s'", name);
@@ -3120,6 +3138,26 @@ static int wpa_supplicant_ctrl_iface_get_network(
 			   "variable '%s'", name);
 		return -1;
 	}
+
+#ifdef SUPPORT_GBK_SSID
+	if (!os_strcmp(name, "ssid")) {
+		if (value[0] != '"' && value[strlen(value)-1] != '"') {
+			u8 ssid_new[32 * 4] = {0};
+			u8 ssid_new2[32 * 4] = {0};
+			memcpy(ssid_new, value, strlen(value));
+			Ascii2Ul(ssid_new, strlen(value));
+			ssid_new2[0] = '"';
+			if (!IsTextUTF8(ssid_new, strlen(ssid_new))) {
+				gbk2utf8(ssid_new, strlen(ssid_new), &ssid_new2[1]);
+			} else {
+				memcpy(ssid_new2 + 1, ssid_new, strlen(ssid_new));
+			}
+			ssid_new2[strlen(ssid_new2)] = '"';
+			ssid_new2[strlen(ssid_new2) + 1] = '\0';
+			memcpy(value, ssid_new2, strlen(ssid_new2)+1);
+		}
+	}
+#endif
 
 	res = os_strlcpy(buf, value, buflen);
 	if (res >= buflen) {

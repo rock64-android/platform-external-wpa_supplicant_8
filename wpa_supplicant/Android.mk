@@ -109,6 +109,16 @@ ifeq ($(CONFIG_OS), internal)
 L_CFLAGS += -DOS_NO_C_LIB_DEFINES
 endif
 
+ifdef CONFIG_SUPPORT_GBK_SSID
+INCLUDES += external/libiconv/include
+INCLUDES += external/libiconv/libcharset
+INCLUDES += external/libiconv/lib
+INCLUDES += external/libiconv/libcharset/include
+INCLUDES += external/libiconv/srclib
+L_CFLAGS += -DSUPPORT_GBK_SSID
+OBJS += src/utils/charencode.c
+endif
+
 OBJS += src/utils/os_$(CONFIG_OS).c
 OBJS_p += src/utils/os_$(CONFIG_OS).c
 OBJS_c += src/utils/os_$(CONFIG_OS).c
@@ -1566,6 +1576,9 @@ ifneq ($(BOARD_WPA_SUPPLICANT_PRIVATE_LIB),)
 LOCAL_STATIC_LIBRARIES += $(BOARD_WPA_SUPPLICANT_PRIVATE_LIB)
 endif
 LOCAL_SHARED_LIBRARIES := libc libcutils liblog libhardware_legacy
+ifdef CONFIG_SUPPORT_GBK_SSID
+LOCAL_SHARED_LIBRARIES += libiconv
+endif
 ifdef CONFIG_EAP_PROXY
 LOCAL_STATIC_LIBRARIES += $(LIB_STATIC_EAP_PROXY)
 LOCAL_SHARED_LIBRARIES += $(LIB_SHARED_EAP_PROXY)

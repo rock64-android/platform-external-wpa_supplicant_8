@@ -41,5 +41,8 @@
 #include <sys/time.h>
 #endif /* __vxworks */
 #endif /* CONFIG_NATIVE_WINDOWS */
+#ifdef SUPPORT_GBK_SSID
+#include "charencode.h"
+#endif
 
 #endif /* INCLUDES_H */
